@@ -19,7 +19,7 @@ import (
 
 // Funcs returns a slice of native Go functions that shall be available
 // from Jsonnet using `std.nativeFunc`
-func Funcs() []*jsonnet.NativeFunction {
+func Funcs(extCode map[string]string) []*jsonnet.NativeFunction {
 	return []*jsonnet.NativeFunction{
 		// Parse serialized data into dicts
 		parseJSON(),
@@ -36,9 +36,20 @@ func Funcs() []*jsonnet.NativeFunction {
 
 		// Hash functions
 		hashSha256(),
+		hasExtVar(extCode),
 
 		helm.NativeFunc(helm.ExecHelm{}),
 		kustomize.NativeFunc(kustomize.ExecKustomize{}),
+	}
+}
+
+func hasExtVar(extCode map[string]string) *jsonnet.NativeFunction {
+	return &jsonnet.NativeFunction{
+		Name:   "hasExtVar",
+		Params: ast.Identifiers{"str"},
+		Func: func(dataString []interface{}) (interface{}, error) {
+			return extCode[dataString[0].(string)] != "", nil
+		},
 	}
 }
 

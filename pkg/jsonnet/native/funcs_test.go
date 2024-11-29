@@ -9,8 +9,8 @@ import (
 )
 
 // callNative calls a native function used by jsonnet VM.
-func callNative(name string, data []interface{}) (res interface{}, err error, callerr error) {
-	for _, fun := range Funcs() {
+func callNative(name string, extCode map[string]string, data []interface{}) (res interface{}, err error, callerr error) {
+	for _, fun := range Funcs(extCode) {
 		if fun.Name == name {
 			// Call the function
 			ret, err := fun.Func(data)
@@ -22,7 +22,7 @@ func callNative(name string, data []interface{}) (res interface{}, err error, ca
 }
 
 func TestSha256(t *testing.T) {
-	ret, err, callerr := callNative("sha256", []interface{}{"foo"})
+	ret, err, callerr := callNative("sha256", map[string]string{}, []interface{}{"foo"})
 
 	assert.Empty(t, callerr)
 	assert.Equal(t, "2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae", ret)
@@ -30,7 +30,7 @@ func TestSha256(t *testing.T) {
 }
 
 func TestParseJSONEmptyDict(t *testing.T) {
-	ret, err, callerr := callNative("parseJson", []interface{}{"{}"})
+	ret, err, callerr := callNative("parseJson", map[string]string{}, []interface{}{"{}"})
 
 	assert.Empty(t, callerr)
 	assert.Equal(t, map[string]interface{}{}, ret)
@@ -38,7 +38,7 @@ func TestParseJSONEmptyDict(t *testing.T) {
 }
 
 func TestParseJSONkeyValuet(t *testing.T) {
-	ret, err, callerr := callNative("parseJson", []interface{}{"{\"a\": 47}"})
+	ret, err, callerr := callNative("parseJson", map[string]string{}, []interface{}{"{\"a\": 47}"})
 
 	assert.Empty(t, callerr)
 	assert.Equal(t, map[string]interface{}{"a": 47.0}, ret)
@@ -46,7 +46,7 @@ func TestParseJSONkeyValuet(t *testing.T) {
 }
 
 func TestParseJSONInvalid(t *testing.T) {
-	ret, err, callerr := callNative("parseJson", []interface{}{""})
+	ret, err, callerr := callNative("parseJson", map[string]string{}, []interface{}{""})
 
 	assert.Empty(t, callerr)
 	assert.Empty(t, ret)
@@ -54,7 +54,7 @@ func TestParseJSONInvalid(t *testing.T) {
 }
 
 func TestParseYAMLEmpty(t *testing.T) {
-	ret, err, callerr := callNative("parseYaml", []interface{}{""})
+	ret, err, callerr := callNative("parseYaml", map[string]string{}, []interface{}{""})
 
 	assert.Empty(t, callerr)
 	assert.Equal(t, []interface{}{}, ret)
@@ -62,7 +62,7 @@ func TestParseYAMLEmpty(t *testing.T) {
 }
 
 func TestParseYAMLKeyValue(t *testing.T) {
-	ret, err, callerr := callNative("parseYaml", []interface{}{"a: 47"})
+	ret, err, callerr := callNative("parseYaml", map[string]string{}, []interface{}{"a: 47"})
 
 	assert.Empty(t, callerr)
 	assert.Equal(t, []interface{}{map[string]interface{}{"a": 47.0}}, ret)
@@ -70,7 +70,7 @@ func TestParseYAMLKeyValue(t *testing.T) {
 }
 
 func TestParseYAMLInvalid(t *testing.T) {
-	ret, err, callerr := callNative("parseYaml", []interface{}{"'"})
+	ret, err, callerr := callNative("parseYaml", map[string]string{}, []interface{}{"'"})
 
 	assert.Empty(t, callerr)
 	assert.Empty(t, ret)
@@ -78,7 +78,7 @@ func TestParseYAMLInvalid(t *testing.T) {
 }
 
 func TestManifestJSONFromJSON(t *testing.T) {
-	ret, err, callerr := callNative("manifestJsonFromJson", []interface{}{"{}", float64(4)})
+	ret, err, callerr := callNative("manifestJsonFromJson", map[string]string{}, []interface{}{"{}", float64(4)})
 
 	assert.Empty(t, callerr)
 	assert.Equal(t, "{}\n", ret)
@@ -86,7 +86,7 @@ func TestManifestJSONFromJSON(t *testing.T) {
 }
 
 func TestManifestJSONFromJSONReindent(t *testing.T) {
-	ret, err, callerr := callNative("manifestJsonFromJson", []interface{}{"{ \"a\": 47}", float64(4)})
+	ret, err, callerr := callNative("manifestJsonFromJson", map[string]string{}, []interface{}{"{ \"a\": 47}", float64(4)})
 
 	assert.Empty(t, callerr)
 	assert.Equal(t, "{\n    \"a\": 47\n}\n", ret)
@@ -94,7 +94,7 @@ func TestManifestJSONFromJSONReindent(t *testing.T) {
 }
 
 func TestManifestJSONFromJSONInvalid(t *testing.T) {
-	ret, err, callerr := callNative("manifestJsonFromJson", []interface{}{"", float64(4)})
+	ret, err, callerr := callNative("manifestJsonFromJson", map[string]string{}, []interface{}{"", float64(4)})
 
 	assert.Empty(t, callerr)
 	assert.Empty(t, ret)
@@ -102,7 +102,7 @@ func TestManifestJSONFromJSONInvalid(t *testing.T) {
 }
 
 func TestManifestYAMLFromJSONEmpty(t *testing.T) {
-	ret, err, callerr := callNative("manifestYamlFromJson", []interface{}{"{}"})
+	ret, err, callerr := callNative("manifestYamlFromJson", map[string]string{}, []interface{}{"{}"})
 
 	assert.Empty(t, callerr)
 	assert.Equal(t, "{}\n", ret)
@@ -110,7 +110,7 @@ func TestManifestYAMLFromJSONEmpty(t *testing.T) {
 }
 
 func TestManifestYAMLFromJSONKeyValue(t *testing.T) {
-	ret, err, callerr := callNative("manifestYamlFromJson", []interface{}{"{ \"a\": 47}"})
+	ret, err, callerr := callNative("manifestYamlFromJson", map[string]string{}, []interface{}{"{ \"a\": 47}"})
 
 	assert.Empty(t, callerr)
 	assert.Equal(t, "a: 47\n", ret)
@@ -118,7 +118,7 @@ func TestManifestYAMLFromJSONKeyValue(t *testing.T) {
 }
 
 func TestManifestYAMLFromJSONList(t *testing.T) {
-	ret, err, callerr := callNative("manifestYamlFromJson", []interface{}{`{ "list": ["a", "b", "c"]}`})
+	ret, err, callerr := callNative("manifestYamlFromJson", map[string]string{}, []interface{}{`{ "list": ["a", "b", "c"]}`})
 
 	assert.Empty(t, callerr)
 	assert.Equal(t, `list:
@@ -130,7 +130,7 @@ func TestManifestYAMLFromJSONList(t *testing.T) {
 }
 
 func TestManifestYAMLFromJSONInvalid(t *testing.T) {
-	ret, err, callerr := callNative("manifestYamlFromJson", []interface{}{""})
+	ret, err, callerr := callNative("manifestYamlFromJson", map[string]string{}, []interface{}{""})
 
 	assert.Empty(t, callerr)
 	assert.Empty(t, ret)
@@ -138,7 +138,7 @@ func TestManifestYAMLFromJSONInvalid(t *testing.T) {
 }
 
 func TestEscapeStringRegex(t *testing.T) {
-	ret, err, callerr := callNative("escapeStringRegex", []interface{}{""})
+	ret, err, callerr := callNative("escapeStringRegex", map[string]string{}, []interface{}{""})
 
 	assert.Empty(t, callerr)
 	assert.Equal(t, "", ret)
@@ -146,7 +146,7 @@ func TestEscapeStringRegex(t *testing.T) {
 }
 
 func TestEscapeStringRegexValue(t *testing.T) {
-	ret, err, callerr := callNative("escapeStringRegex", []interface{}{"([0-9]+).*\\s"})
+	ret, err, callerr := callNative("escapeStringRegex", map[string]string{}, []interface{}{"([0-9]+).*\\s"})
 
 	assert.Empty(t, callerr)
 	assert.Equal(t, "\\(\\[0-9\\]\\+\\)\\.\\*\\\\s", ret)
@@ -154,7 +154,7 @@ func TestEscapeStringRegexValue(t *testing.T) {
 }
 
 func TestEscapeStringRegexInvalid(t *testing.T) {
-	ret, err, callerr := callNative("escapeStringRegex", []interface{}{"([0-9]+"})
+	ret, err, callerr := callNative("escapeStringRegex", map[string]string{}, []interface{}{"([0-9]+"})
 
 	assert.Empty(t, callerr)
 	assert.Equal(t, "\\(\\[0-9\\]\\+", ret)
@@ -162,7 +162,7 @@ func TestEscapeStringRegexInvalid(t *testing.T) {
 }
 
 func TestRegexMatch(t *testing.T) {
-	ret, err, callerr := callNative("regexMatch", []interface{}{"", "a"})
+	ret, err, callerr := callNative("regexMatch", map[string]string{}, []interface{}{"", "a"})
 
 	assert.Empty(t, callerr)
 	assert.Equal(t, true, ret)
@@ -170,7 +170,7 @@ func TestRegexMatch(t *testing.T) {
 }
 
 func TestRegexMatchNoMatch(t *testing.T) {
-	ret, err, callerr := callNative("regexMatch", []interface{}{"a", "b"})
+	ret, err, callerr := callNative("regexMatch", map[string]string{}, []interface{}{"a", "b"})
 
 	assert.Empty(t, callerr)
 	assert.Equal(t, false, ret)
@@ -178,7 +178,7 @@ func TestRegexMatchNoMatch(t *testing.T) {
 }
 
 func TestRegexMatchInvalidRegex(t *testing.T) {
-	ret, err, callerr := callNative("regexMatch", []interface{}{"[0-", "b"})
+	ret, err, callerr := callNative("regexMatch", map[string]string{}, []interface{}{"[0-", "b"})
 
 	assert.Empty(t, callerr)
 	assert.Empty(t, ret)
@@ -186,7 +186,7 @@ func TestRegexMatchInvalidRegex(t *testing.T) {
 }
 
 func TestRegexSubstNoChange(t *testing.T) {
-	ret, err, callerr := callNative("regexSubst", []interface{}{"a", "b", "c"})
+	ret, err, callerr := callNative("regexSubst", map[string]string{}, []interface{}{"a", "b", "c"})
 
 	assert.Empty(t, callerr)
 	assert.Equal(t, "b", ret)
@@ -194,7 +194,7 @@ func TestRegexSubstNoChange(t *testing.T) {
 }
 
 func TestRegexSubstValid(t *testing.T) {
-	ret, err, callerr := callNative("regexSubst", []interface{}{"p[^m]*", "pm", "poe"})
+	ret, err, callerr := callNative("regexSubst", map[string]string{}, []interface{}{"p[^m]*", "pm", "poe"})
 
 	assert.Empty(t, callerr)
 	assert.Equal(t, "poem", ret)
@@ -202,9 +202,25 @@ func TestRegexSubstValid(t *testing.T) {
 }
 
 func TestRegexSubstInvalid(t *testing.T) {
-	ret, err, callerr := callNative("regexSubst", []interface{}{"p[^m*", "pm", "poe"})
+	ret, err, callerr := callNative("regexSubst", map[string]string{}, []interface{}{"p[^m*", "pm", "poe"})
 
 	assert.Empty(t, callerr)
 	assert.Empty(t, ret)
 	assert.NotEmpty(t, err)
+}
+
+func TestHasExtVarFalse(t *testing.T) {
+	ret, err, callerr := callNative("hasExtVar", map[string]string{}, []interface{}{"variableName"})
+
+	assert.Empty(t, callerr)
+	assert.Empty(t, err)
+	assert.Equal(t, false, ret)
+}
+
+func TestHasExtVarTrue(t *testing.T) {
+	ret, err, callerr := callNative("hasExtVar", map[string]string{"variableName": "value"}, []interface{}{"variableName"})
+
+	assert.Empty(t, callerr)
+	assert.Empty(t, err)
+	assert.Equal(t, true, ret)
 }
