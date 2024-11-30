@@ -21,7 +21,7 @@ func MakeRawVM(importPaths []string, extCode map[string]string, tlaCode map[stri
 		vm.TLACode(k, v)
 	}
 
-	for _, nf := range native.Funcs() {
+	for _, nf := range native.Funcs(extCode) {
 		vm.NativeFunction(nf)
 	}
 
